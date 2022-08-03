@@ -1,0 +1,66 @@
+import "array"
+import "csv"
+
+sampleData = csv.from(csv: "
+#datatype,string,long,dateTime:RFC3339,string,string,double
+#group,false,true,false,true,true,false
+#default,,,,,,
+,result,table,_time,location,_field,_value
+,,0,2019-11-01T12:00:00Z,sfo,temp,65.1
+,,0,2019-11-01T13:00:00Z,sfo,temp,66.2
+,,0,2019-11-01T14:00:00Z,sfo,temp,66.3
+,,0,2019-11-01T15:00:00Z,sfo,temp,66.8
+,,1,2019-11-01T12:00:00Z,kjfk,temp,69.4
+,,1,2019-11-01T13:00:00Z,kjfk,temp,69.9
+,,1,2019-11-01T14:00:00Z,kjfk,temp,71.0
+,,1,2019-11-01T15:00:00Z,kjfk,temp,71.2
+,,2,2019-11-01T12:00:00Z,kord,temp,46.4
+,,2,2019-11-01T13:00:00Z,kord,temp,46.3
+,,2,2019-11-01T14:00:00Z,kord,temp,42.7
+,,2,2019-11-01T15:00:00Z,kord,temp,38.9
+")
+ip_map = from(bucket: "telegraf")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["_measurement"] == "exec")
+  |> filter(fn: (r) => r["_field"] == "pod_mapping_ip" or r["_field"] == "pod_mapping_pod_name")
+  |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+  |> group()
+
+ip_to_pod_name = (data, ip) => {
+  temp = data 
+  //|> filter(fn: (r) => r["pod_mapping_ip"] == ip)
+  //|> last(column: "pod_mapping_pod_name")
+  |> findRecord(
+        fn: (key) => key.pod_mapping_ip == ip,
+        idx: 0,
+    )
+  return temp
+}
+
+data = from(bucket: "telegraf")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["process_kprobe_process_pod_namespace"] == "default")
+  |> filter(fn: (r) => r["process_kprobe_function_name"] == "dev_queue_xmit" 
+    or r["process_kprobe_function_name"] == "netif_receive_skb"
+    or r["process_kprobe_function_name"] == "tcp_v4_rcv"
+    )
+  |> filter(fn: (r) => r["_field"] == "process_kprobe_args_0_skb_arg_len" 
+    or r["_field"] == "process_kprobe_args_0_skb_arg_hash"
+    or r["_field"] == "process_kprobe_args_0_skb_arg_saddr"
+    or r["_field"] == "process_kprobe_args_0_skb_arg_sport"
+    or r["_field"] == "process_kprobe_args_0_skb_arg_daddr"
+    or r["_field"] == "process_kprobe_args_0_skb_arg_dport"
+    or r["_field"] == "process_kprobe_process_binary"
+    or r["_field"] == "process_kprobe_process_arguments"
+    )
+    
+    |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+    //|> distinct(column: "process_kprobe_args_0_skb_arg_hash")
+    |> map(fn: (r) => ({ r with dest: r.process_kprobe_args_0_skb_arg_daddr + ":" + string(v: r.process_kprobe_args_0_skb_arg_dport) }))
+    |> map(fn: (r) => ({ r with source: r.process_kprobe_args_0_skb_arg_saddr + ":" + string(v: r.process_kprobe_args_0_skb_arg_sport) }))
+    |> map(fn: (r) => ({ r with Cmd: r.process_kprobe_process_binary + " " + string(v: r.process_kprobe_process_arguments) }))
+    |> drop(fn: (column) => column =~ /^*(port|addr)$/)
+    |> drop(fn: (column) => column =~ /^*(binary|arguments)$/)
+    |> drop(fn: (column) => column == "host")
+sampleData
+  |> map(fn: (r) => (ip_to_pod_name(data: ip_map, ip: "10.244.0.6")))
