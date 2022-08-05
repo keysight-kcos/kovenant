@@ -20,18 +20,11 @@ spec:
      - index: 0
        type: "sock"
      - index: 2
-       type: int
+       type: size_t
   - call: "tcp_recvmsg"
     syscall: false
     args:
      - index: 0
        type: "sock"
      - index: 2
-       type: int
-     - index: 5
-       type: int
-  - call: "tcp_v4_rcv"
-    syscall: false
-    args:
-     - index: 0
-       type: "skb"
+       type: size_t

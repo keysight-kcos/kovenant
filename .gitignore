@@ -1,2 +1,4 @@
 telegraf_image/config
 telegraf_image/kubectl
+__pycache__
+__pycache__/*

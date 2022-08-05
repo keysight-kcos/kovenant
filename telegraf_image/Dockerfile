@@ -3,6 +3,9 @@ FROM telegraf:1.19
 COPY ./kubectl /kubectl
 RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 RUN usermod -g 0 telegraf
+RUN apt-get update && apt-get install -y --no-install-recommends python3
 COPY ./config /.kube/config
 COPY ./pod_ip_mapping /usr/bin/pod_ip_mapping
 COPY ./ips_to_pods.sh /usr/bin/ips_to_pods.sh
+COPY ./log_filter.py /usr/bin/log_filter.py
+COPY ./filtered_tetragon_logs.sh /usr/bin/filtered_tetragon_logs.sh

@@ -19,3 +19,8 @@ spec:
     args:
      - index: 0
        type: "skb"
+  - call: "tcp_v4_rcv"
+    syscall: false
+    args:
+     - index: 0
+       type: "skb"
