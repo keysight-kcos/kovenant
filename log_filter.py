@@ -78,6 +78,13 @@ def main():
 					"length": int(log_obj["args"][1]["size_arg"]),
 				}
 				new_log_obj["time"] = time
+			elif fn_name == "__x64_sys_read" or fn_name == "__x64_sys_write":
+				new_log_obj = {
+					"function": fn_name,
+					"pod": get_pod_info(log_obj["process"]["pod"]),
+					"length": int(log_obj["args"][0]["size_arg"]),
+				}
+				new_log_obj["time"] = time
 			else:
 				continue
 			print(json.dumps(new_log_obj))
