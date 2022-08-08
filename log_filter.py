@@ -1,9 +1,14 @@
 #!/usr/bin/python3
 
-import sys, json, os
+import sys, json, os, time
 
 IPS_TO_PODS_PATH = "/usr/bin/ips_to_pods.sh"
+UPDATE_INTERVAL = 30
 ip_map = {}
+
+def check_update_ip_map():
+	if time.time() - ip_map["fetched_at"] >= UPDATE_INTERVAL:
+		set_pod_ip_map()
 
 def set_pod_ip_map():
 	new_ip_map = {}
@@ -17,6 +22,7 @@ def set_pod_ip_map():
 		if ip == control_plane_ip:
 			continue
 		new_ip_map[ip] = name
+	new_ip_map["fetched_at"] = time.time()
 
 	global ip_map 
 	ip_map = new_ip_map
@@ -44,18 +50,17 @@ def get_sock_info(args):
 	ret["dport"] = dport
 	ret["src"] = saddr+":"+str(sport)
 	ret["dest"] = daddr+":"+str(dport)
+	check_update_ip_map()
 	ret["src_object"] = ip_to_pod_name(saddr)
 	ret["dest_object"] = ip_to_pod_name(daddr)
 
 	return ret
 
+def stub():
+	print("test")
+
 def main(): 
 	set_pod_ip_map()
-	'''
-	for k, v in ip_map.items():
-		print(f'{k}: {v}')
-	return
-	'''
 	for line in sys.stdin:
 		log_obj = json.loads(line)
 		if "process_kprobe" in log_obj:
@@ -88,11 +93,5 @@ def main():
 			else:
 				continue
 			print(json.dumps(new_log_obj))
-
-		'''
-		else:
-			print("DEBUG: not a kprobe obj")
-			continue
-		'''
 
 main()
