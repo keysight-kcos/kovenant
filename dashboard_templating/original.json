@@ -1,0 +1,1001 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 2,
+  "iteration": 1659977858878,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "KyNwf_zVk"
+          },
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"__x64_sys_read\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> filter(fn: (r) => r[\"pod_name\"] =~ /^*$/)\r\n  |> filter(fn: (r) => r[\"_field\"] == \"length\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({r with kilobytes:  float(v: r.length) / 1024.0}))\r\n  |> drop(fn: (column) => column == \"function\")\r\n  |> drop(fn: (column) => column == \"host\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> drop(fn: (column) => column == \"_measurement\")\r\n  //|> keep(columns: [\"_time\", \"pod_name\", \"pod_namespace\", \"connections\"])\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  //|> window(every: 30s)\r\n  //|> count(column: \"dest\")\r\n  //|> keep(columns: [\"_time\", \"source\", \"connections\"])\r\n  |> aggregateWindow(every: 30s, fn: sum, column: \"kilobytes\")",
+          "refId": "A"
+        }
+      ],
+      "title": "$namespace: Kilobytes Read by Pod",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*(pod_name=\"(.*)\",).*)",
+            "renamePattern": "$3"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "KyNwf_zVk"
+          },
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"__x64_sys_write\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> filter(fn: (r) => r[\"pod_name\"] =~ /^*$/)\r\n  |> filter(fn: (r) => r[\"_field\"] == \"length\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({r with kilobytes:  float(v: r.length) / 1024.0}))\r\n  |> drop(fn: (column) => column == \"function\")\r\n  |> drop(fn: (column) => column == \"host\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> drop(fn: (column) => column == \"_measurement\")\r\n  //|> keep(columns: [\"_time\", \"pod_name\", \"pod_namespace\", \"connections\"])\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  //|> window(every: 30s)\r\n  //|> count(column: \"dest\")\r\n  //|> keep(columns: [\"_time\", \"source\", \"connections\"])\r\n  |> aggregateWindow(every: 30s, fn: sum, column: \"kilobytes\")",
+          "refId": "A"
+        }
+      ],
+      "title": "$namespace: Kilobytes Write by Pod",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*(pod_name=\"(.*)\",).*)",
+            "renamePattern": "$3"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "KyNwf_zVk"
+          },
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_recvmsg\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> filter(fn: (r) => r[\"pod_name\"] =~ /^*$/)\r\n  |> filter(fn: (r) => r[\"_field\"] == \"length\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({r with kilobytes:  float(v: r.length)   / 1024.0}))\r\n  |> drop(fn: (column) => column == \"function\")\r\n  |> drop(fn: (column) => column == \"host\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> drop(fn: (column) => column == \"_measurement\")\r\n  //|> keep(columns: [\"_time\", \"pod_name\", \"pod_namespace\", \"connections\"])\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  //|> window(every: 30s)\r\n  //|> count(column: \"dest\")\r\n  //|> keep(columns: [\"_time\", \"source\", \"connections\"])\r\n  |> aggregateWindow(every: 30s, fn: sum, column: \"kilobytes\")",
+          "refId": "A"
+        }
+      ],
+      "title": "$namespace: TCP Kilobytes Received by Pod",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*(pod_name=\"(.*)\",).*)",
+            "renamePattern": "$3"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "KyNwf_zVk"
+          },
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_sendmsg\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> filter(fn: (r) => r[\"pod_name\"] =~ /^*$/)\r\n  |> filter(fn: (r) => r[\"_field\"] == \"length\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({r with kilobytes:  float(v: r.length) / 1024.0}))\r\n  |> drop(fn: (column) => column == \"function\")\r\n  |> drop(fn: (column) => column == \"host\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> drop(fn: (column) => column == \"_measurement\")\r\n  //|> keep(columns: [\"_time\", \"pod_name\", \"pod_namespace\", \"connections\"])\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  //|> window(every: 30s)\r\n  //|> count(column: \"dest\")\r\n  //|> keep(columns: [\"_time\", \"source\", \"connections\"])\r\n  |> aggregateWindow(every: 30s, fn: sum, column: \"kilobytes\")",
+          "refId": "A"
+        }
+      ],
+      "title": "$namespace: TCP Kilobytes Sent bv Pod",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*(pod_name=\"(.*)\",).*)",
+            "renamePattern": "$3"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "KyNwf_zVk"
+          },
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_connect\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> filter(fn: (r) => r[\"pod_name\"] =~ /^*$/)\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({ r with connections: 1 }))\r\n  |> drop(fn: (column) => column == \"function\")\r\n  |> drop(fn: (column) => column == \"host\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> drop(fn: (column) => column == \"_measurement\")\r\n  |> keep(columns: [\"_time\", \"pod_name\", \"pod_namespace\", \"connections\"])\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  //|> window(every: 30s)\r\n  //|> count(column: \"dest\")\r\n  //|> keep(columns: [\"_time\", \"source\", \"connections\"])\r\n  |> aggregateWindow(every: 30s, fn: count, column: \"connections\")",
+          "refId": "A"
+        }
+      ],
+      "title": "$namespace: TCP Connections by Pod",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*(pod_name=\"(.*)\",).*)",
+            "renamePattern": "$3"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 25
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "8.4.3",
+      "repeat": "namespace",
+      "repeatDirection": "h",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "KyNwf_zVk"
+          },
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_connect\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"sock_daddr\" \r\n    or r[\"_field\"] == \"sock_saddr\" or r[\"_field\"] == \"sock_dest_object\" or r[\"_field\"] == \"sock_src_object\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  //|> group(columns: [\"sock_daddr\", \"sock_dest_object\"])\r\n  |> map(fn: (r) => ({ r with connections: 1 }))\r\n  |> map(fn: (r) => ({ r with k8s_src: r.sock_src_object}))\r\n  |> map(fn: (r) => ({ r with k8s_dest: r.sock_dest_object}))\r\n  |> map(fn: (r) => ({ r with src: r.sock_saddr}))\r\n  |> map(fn: (r) => ({ r with dest: r.sock_daddr}))\r\n  |> keep(columns: [\"connections\", \"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> group(columns: [\"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> count(column: \"connections\")",
+          "refId": "A"
+        }
+      ],
+      "title": "$namespace: TCP Connection Count",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*(dest=\"(\\d+\\.\\d+\\.\\d+\\.\\d+)\")(, )(k8s_dest=\"(.*)\")(, )(k8s_src=\"(.*)\")(, )(src=\"(.*)\")}$)",
+            "renamePattern": "$12 -> $3, $9 -> $6"
+          }
+        }
+      ],
+      "type": "piechart"
+    },
+    {
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 47
+      },
+      "id": 10,
+      "options": {
+        "displayLabels": [
+          "value"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "values": [
+            "value"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "8.4.3",
+      "repeatDirection": "h",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "KyNwf_zVk"
+          },
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_sendmsg\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"sock_daddr\" \r\n    or r[\"_field\"] == \"sock_saddr\" or r[\"_field\"] == \"sock_dest_object\" or r[\"_field\"] == \"sock_src_object\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  //|> group(columns: [\"sock_daddr\", \"sock_dest_object\"])\r\n  |> map(fn: (r) => ({ r with connections: 1 }))\r\n  |> map(fn: (r) => ({ r with k8s_src: r.sock_src_object}))\r\n  |> map(fn: (r) => ({ r with k8s_dest: r.sock_dest_object}))\r\n  |> map(fn: (r) => ({ r with src: r.sock_saddr}))\r\n  |> map(fn: (r) => ({ r with dest: r.sock_daddr}))\r\n  |> keep(columns: [\"connections\", \"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> group(columns: [\"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> count(column: \"connections\")",
+          "refId": "A"
+        }
+      ],
+      "title": "$namespace: TCP Send Count",
+      "transformations": [
+        {
+          "disabled": true,
+          "id": "renameByRegex",
+          "options": {
+            "regex": "((connections {)(.*)(}))",
+            "renamePattern": "$3"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*(dest=\"(\\d+\\.\\d+\\.\\d+\\.\\d+)\")(, )(k8s_dest=\"(.*)\")(, )(k8s_src=\"(.*)\")(, )(src=\"(.*)\")}$)",
+            "renamePattern": "$12 -> $3, $9 -> $6"
+          }
+        }
+      ],
+      "type": "piechart"
+    },
+    {
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 58
+      },
+      "id": 14,
+      "options": {
+        "displayLabels": [
+          "value"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "values": [
+            "value"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "8.4.3",
+      "repeatDirection": "h",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "KyNwf_zVk"
+          },
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_recvmsg\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"sock_daddr\" \r\n    or r[\"_field\"] == \"sock_saddr\" or r[\"_field\"] == \"sock_dest_object\" or r[\"_field\"] == \"sock_src_object\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  //|> group(columns: [\"sock_daddr\", \"sock_dest_object\"])\r\n  |> map(fn: (r) => ({ r with connections: 1 }))\r\n  |> map(fn: (r) => ({ r with k8s_src: r.sock_src_object}))\r\n  |> map(fn: (r) => ({ r with k8s_dest: r.sock_dest_object}))\r\n  |> map(fn: (r) => ({ r with src: r.sock_saddr}))\r\n  |> map(fn: (r) => ({ r with dest: r.sock_daddr}))\r\n  |> keep(columns: [\"connections\", \"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> group(columns: [\"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> count(column: \"connections\")",
+          "refId": "A"
+        }
+      ],
+      "title": "$namespace: TCP Receive Count",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*(dest=\"(\\d+\\.\\d+\\.\\d+\\.\\d+)\")(, )(k8s_dest=\"(.*)\")(, )(k8s_src=\"(.*)\")(, )(src=\"(.*)\")}$)",
+            "renamePattern": "$3 -> $12, $6 -> $9"
+          }
+        }
+      ],
+      "type": "piechart"
+    },
+    {
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 69
+      },
+      "id": 12,
+      "options": {
+        "displayLabels": [
+          "value"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "values": [
+            "value"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "8.4.3",
+      "repeatDirection": "h",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "KyNwf_zVk"
+          },
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_sendmsg\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"sock_daddr\" or r[\"_field\"] == \"length\"\r\n    or r[\"_field\"] == \"sock_saddr\" or r[\"_field\"] == \"sock_dest_object\" or r[\"_field\"] == \"sock_src_object\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  //|> group(columns: [\"sock_daddr\", \"sock_dest_object\", \"length\"])\r\n  |> map(fn: (r) => ({ r with kilobytes: float(v: r.length) / 1024.}))\r\n  |> map(fn: (r) => ({ r with k8s_src: r.sock_src_object}))\r\n  |> map(fn: (r) => ({ r with k8s_dest: r.sock_dest_object}))\r\n  |> map(fn: (r) => ({ r with src: r.sock_saddr}))\r\n  |> map(fn: (r) => ({ r with dest: r.sock_daddr}))\r\n  |> keep(columns: [\"kilobytes\", \"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> group(columns: [\"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> sum(column: \"kilobytes\")",
+          "refId": "A"
+        }
+      ],
+      "title": "$namespace: TCP Kilobytes Sent",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*(dest=\"(\\d+\\.\\d+\\.\\d+\\.\\d+)\")(, )(k8s_dest=\"(.*)\")(, )(k8s_src=\"(.*)\")(, )(src=\"(.*)\")}$)",
+            "renamePattern": "$12 -> $3, $9 -> $6"
+          }
+        }
+      ],
+      "type": "piechart"
+    },
+    {
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 69
+      },
+      "id": 15,
+      "options": {
+        "displayLabels": [
+          "value"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "values": [
+            "value"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "8.4.3",
+      "repeatDirection": "h",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "KyNwf_zVk"
+          },
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_recvmsg\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"sock_daddr\" or r[\"_field\"] == \"length\"\r\n    or r[\"_field\"] == \"sock_saddr\" or r[\"_field\"] == \"sock_dest_object\" or r[\"_field\"] == \"sock_src_object\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  //|> group(columns: [\"sock_daddr\", \"sock_dest_object\", \"length\"])\r\n  |> map(fn: (r) => ({ r with kilobytes: float(v: r.length) / (1024. * 1024.)}))\r\n  |> map(fn: (r) => ({ r with k8s_src: r.sock_src_object}))\r\n  |> map(fn: (r) => ({ r with k8s_dest: r.sock_dest_object}))\r\n  |> map(fn: (r) => ({ r with src: r.sock_saddr}))\r\n  |> map(fn: (r) => ({ r with dest: r.sock_daddr}))\r\n  |> keep(columns: [\"kilobytes\", \"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> group(columns: [\"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> sum(column: \"kilobytes\")",
+          "refId": "A"
+        }
+      ],
+      "title": "$namespace: TCP Megabytes Received",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*(dest=\"(\\d+\\.\\d+\\.\\d+\\.\\d+)\")(, )(k8s_dest=\"(.*)\")(, )(k8s_src=\"(.*)\")(, )(src=\"(.*)\")}$)",
+            "renamePattern": "$3 -> $12, $6 -> $9"
+          }
+        }
+      ],
+      "type": "piechart"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 35,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": "kcos-sso",
+          "value": "kcos-sso"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "namespace",
+        "options": [
+          {
+            "selected": false,
+            "text": "default",
+            "value": "default"
+          },
+          {
+            "selected": false,
+            "text": "kcos-better-crd-adopter",
+            "value": "kcos-better-crd-adopter"
+          },
+          {
+            "selected": false,
+            "text": "kcos-deployment",
+            "value": "kcos-deployment"
+          },
+          {
+            "selected": false,
+            "text": "kcos-firewall",
+            "value": "kcos-firewall"
+          },
+          {
+            "selected": false,
+            "text": "kcos-framework",
+            "value": "kcos-framework"
+          },
+          {
+            "selected": false,
+            "text": "kcos-ghost-core",
+            "value": "kcos-ghost-core"
+          },
+          {
+            "selected": false,
+            "text": "kcos-ghost-core-values",
+            "value": "kcos-ghost-core-values"
+          },
+          {
+            "selected": false,
+            "text": "kcos-ghost-deploy",
+            "value": "kcos-ghost-deploy"
+          },
+          {
+            "selected": false,
+            "text": "kcos-introspection",
+            "value": "kcos-introspection"
+          },
+          {
+            "selected": false,
+            "text": "kcos-keycloak-operator-crds",
+            "value": "kcos-keycloak-operator-crds"
+          },
+          {
+            "selected": false,
+            "text": "kcos-licensing",
+            "value": "kcos-licensing"
+          },
+          {
+            "selected": false,
+            "text": "kcos-rest-api",
+            "value": "kcos-rest-api"
+          },
+          {
+            "selected": true,
+            "text": "kcos-sso",
+            "value": "kcos-sso"
+          },
+          {
+            "selected": false,
+            "text": "kcos-test-deployment",
+            "value": "kcos-test-deployment"
+          },
+          {
+            "selected": false,
+            "text": "kcos-test-deployment-service-b",
+            "value": "kcos-test-deployment-service-b"
+          },
+          {
+            "selected": false,
+            "text": "kcos-test-deployment-values",
+            "value": "kcos-test-deployment-values"
+          },
+          {
+            "selected": false,
+            "text": "kcos-ui",
+            "value": "kcos-ui"
+          },
+          {
+            "selected": false,
+            "text": "kcos-upgrade-k8s",
+            "value": "kcos-upgrade-k8s"
+          },
+          {
+            "selected": false,
+            "text": "kcos-weave-net",
+            "value": "kcos-weave-net"
+          },
+          {
+            "selected": false,
+            "text": "kube-node-lease",
+            "value": "kube-node-lease"
+          },
+          {
+            "selected": false,
+            "text": "kube-public",
+            "value": "kube-public"
+          },
+          {
+            "selected": false,
+            "text": "kube-system",
+            "value": "kube-system"
+          }
+        ],
+        "query": "default,\nkcos-better-crd-adopter,\nkcos-deployment,\nkcos-firewall,\nkcos-framework,\nkcos-ghost-core,\nkcos-ghost-core-values,\nkcos-ghost-deploy,\nkcos-introspection,\nkcos-keycloak-operator-crds,\nkcos-licensing,\nkcos-rest-api,\nkcos-sso,\nkcos-test-deployment,\nkcos-test-deployment-service-b,\nkcos-test-deployment-values,\nkcos-ui,\nkcos-upgrade-k8s,\nkcos-weave-net,\nkube-node-lease,\nkube-public,\nkube-system,",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Tetragon",
+  "uid": "AdiOP_k4z",
+  "version": 77,
+  "weekStart": ""
+}

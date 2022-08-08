@@ -2,3 +2,4 @@ telegraf_image/config
 telegraf_image/kubectl
 __pycache__
 __pycache__/*
+dashboard_templating/.env

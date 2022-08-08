@@ -1,0 +1,21 @@
+"current": {
+	"selected": true,
+	"text": "{{ namespaces[0].namespace }}",
+	"value": "{{ namespaces[0].namespace }}"
+},
+"options": [
+{% for n in namespaces %}
+	{
+		"selected": {{ n.selected }},
+		"text": "{{ n.namespace }}",
+		"value": "{{ n.namespace }}"
+	}{{ ", " if not loop.last else "" }}
+{% endfor -%}
+],
+
+
+"query": "
+	{%- for n in namespaces -%}
+	{{ n.namespace }}{{ ", \\n" if not loop.last else "," }}
+	{%- endfor -%}
+",
