@@ -9,6 +9,13 @@ ip_map = {}
 helm_map = {}
 pod_to_chart = {}
 
+# strip checksum from the end of a k8s object name
+def strip_suffix(name):
+	split = name.split("-")
+	if len(split) > 1:
+		return "-".join(split[:-1])
+	return name
+
 def set_helm_map():
 	global helm_map
 	stream = os.popen(GET_HELM_PATH)
@@ -17,31 +24,6 @@ def set_helm_map():
 		name, chart = line.split()
 		helm_map[name] = chart
 	#print(json.dumps(helm_map))
-
-def deployments_to_charts():
-	cmd = r"""kubectl get deployments -A -l='app.kubernetes.io/managed-by=Helm' -o=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.labels}{"\t"}{.metadata.annotations}{"\n"}{end}'"""
-	stream = os.popen(cmd)
-	lines = [line.strip() for line in stream.readlines()]
-
-	dep_to_chart = {}
-	for line in lines:
-		found = False
-
-		name, temp1, temp2 = line.split()
-		labels, annotations = json.loads(temp1), json.loads(temp2)
-		for v in labels.values():
-			if v in helm_map:
-				dep_to_chart[name] = helm_map[v]
-				found = True
-				break
-		if found: 
-			continue
-		for v in annotations.values():
-			if v in helm_map:
-				dep_to_chart[name] = helm_map[v]
-				break
-
-	print(json.dumps(dep_to_chart))
 
 def objects_to_charts():
 	cmd = r"""kubectl get all -A -l='app.kubernetes.io/managed-by=Helm' -o=jsonpath='{range .items[*]}{.kind}{")*("}{.metadata.name}{")*("}{.metadata.labels}{")*("}{.metadata.annotations}{"\n"}{end}'"""
@@ -84,13 +66,43 @@ def objects_to_charts():
 				if v in helm_map:
 					obj_to_chart[name] = {'kind': kind, 'chart': helm_map[v]}
 					break
+	#print(json.dumps(obj_to_chart))
+	return obj_to_chart
 
-	print(json.dumps(obj_to_chart))
+def pods_to_charts():
+	global pod_to_chart
+	obj_to_chart = objects_to_charts()
+
+	cmd = r"""kubectl get pods -A -o=jsonpath='{range .items[*]}{.metadata.name}{")*("}{.metadata.ownerReferences[0].name}{"\n"}{end}'"""
+	stream = os.popen(cmd)
+	lines = [line.strip() for line in stream.readlines()]
+	for line in lines:
+		found = False
+
+		split = [item if len(item) != 0 else "N0N3" for item in line.split(")*(")]
+		if len(split) != 2:
+			print("\nUnexpected fetch:", split, end="\n\n")
+			continue
+
+		name, parent_obj = split
+		stripped_parent_obj = strip_suffix(parent_obj)
+		if parent_obj in obj_to_chart:
+			pod_to_chart[name] = obj_to_chart[parent_obj]["chart"]
+		elif stripped_parent_obj in obj_to_chart:
+			pod_to_chart[name] = obj_to_chart[stripped_parent_obj]["chart"]
+
+	print(json.dumps(pod_to_chart))
 
 def stub():
+	'''
+	print(strip_suffix("keycloak-operator-5bc7649f79"))
+	print(strip_suffix("coredns-55995c9468"))
+	print(strip_suffix("keycloak"))
+	return 
+	'''
 	set_helm_map()
-	#deployments_to_charts()
-	objects_to_charts()
+	#objects_to_charts()
+	pods_to_charts()
 
 def check_update_ip_map():
 	if time.time() - ip_map["fetched_at"] >= UPDATE_INTERVAL:
