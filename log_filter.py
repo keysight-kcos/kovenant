@@ -122,7 +122,6 @@ def pods_to_charts():
 		elif stripped_parent_obj in obj_to_chart:
 			pod_to_chart[name] = obj_to_chart[stripped_parent_obj]["chart"]
 
-	print(json.dumps(pod_to_chart))
 
 def stub():
 	'''
@@ -132,8 +131,9 @@ def stub():
 	return 
 	'''
 	set_helm_map()
-	#objects_to_charts()
-	pods_to_charts()
+	#pods_to_charts()
+	print(json.dumps(objects_to_charts()))
+	#print(json.dumps(pod_to_chart))
 
 def check_update_ip_map():
 	if time.time() - ip_map["fetched_at"] >= UPDATE_INTERVAL:
@@ -161,10 +161,16 @@ def ip_to_pod_name(ip):
 		return ip_map[ip]
 	return "none"
 
+def pod_name_to_chart(pod_name):
+	if pod_name in pod_to_chart:	
+		return pod_to_chart[pod_name]
+	return "none"
+
 def get_pod_info(pod_dict):
 	ret = {}
 	ret["name"] = pod_dict["name"]
 	ret["namespace"] = pod_dict["namespace"]
+	ret["chart"] = pod_name_to_chart(ret["name"])
 	return ret
 
 def get_sock_info(args):
@@ -182,11 +188,16 @@ def get_sock_info(args):
 	check_update_ip_map()
 	ret["src_object"] = ip_to_pod_name(saddr)
 	ret["dest_object"] = ip_to_pod_name(daddr)
+	ret["src_chart"] = pod_name_to_chart(ret["src_object"])
+	ret["dest_chart"] = pod_name_to_chart(ret["dest_object"])
 
 	return ret
 
 def main(): 
+	set_helm_map()
+	pods_to_charts()
 	set_pod_ip_map()
+
 	for line in sys.stdin:
 		log_obj = json.loads(line)
 		if "process_kprobe" in log_obj:
@@ -220,4 +231,4 @@ def main():
 				continue
 			print(json.dumps(new_log_obj))
 
-stub()
+main()
