@@ -69,9 +69,40 @@ def objects_to_charts():
 	#print(json.dumps(obj_to_chart))
 	return obj_to_chart
 
+# services and pods are both checked in the 
+# 'pod' mappings
+def services_to_charts():
+	global pod_to_chart
+	cmd = r"""kubectl get services -A -o=jsonpath='{range .items[*]}{.metadata.name}{")*("}{.metadata.labels}{")*("}{.metadata.annotations}{"\n"}{end}'"""
+	stream = os.popen(cmd)
+	lines = [line.strip() for line in stream.readlines()]
+
+	for line in lines:
+		found = False
+
+		split = [item if len(item) != 0 else r"""{"none": "N0N3"}""" for item in line.split(")*(")]
+		if len(split) != 3:
+			print("\nUnexpected fetch:", split, end="\n\n")
+			continue
+
+		name, temp1, temp2 = split
+		labels, annotations = json.loads(temp1), json.loads(temp2)
+		for v in labels.values():
+			if v in helm_map:
+				pod_to_chart[name] = helm_map[v]
+				found = True
+				break
+		if found: 
+			continue
+		for v in annotations.values():
+			if v in helm_map:
+				pod_to_chart[name] = helm_map[v]
+				break
+
 def pods_to_charts():
 	global pod_to_chart
 	obj_to_chart = objects_to_charts()
+	services_to_charts()
 
 	cmd = r"""kubectl get pods -A -o=jsonpath='{range .items[*]}{.metadata.name}{")*("}{.metadata.ownerReferences[0].name}{"\n"}{end}'"""
 	stream = os.popen(cmd)
