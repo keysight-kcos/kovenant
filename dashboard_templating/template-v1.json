@@ -22,7 +22,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": {{ id }},
-  "iteration": 1660151413935,
+  "iteration": 1659977858878,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -102,7 +102,7 @@
             "type": "{{ datasource_type }}",
             "uid": "{{ datasource_uid }}"
           },
-          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"__x64_sys_read\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> filter(fn: (r) => r[\"pod_name\"] =~ /^*$/)\r\n  |> filter(fn: (r) => r[\"_field\"] == \"length\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({r with kilobytes:  float(v: r.length) / 1024.0}))\r\n  |> drop(fn: (column) => column == \"function\")\r\n  |> drop(fn: (column) => column == \"host\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> drop(fn: (column) => column == \"_measurement\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> aggregateWindow(every: 30s, fn: sum, column: \"kilobytes\")",
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"__x64_sys_read\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> filter(fn: (r) => r[\"pod_name\"] =~ /^*$/)\r\n  |> filter(fn: (r) => r[\"_field\"] == \"length\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({r with kilobytes:  float(v: r.length) / 1024.0}))\r\n  |> drop(fn: (column) => column == \"function\")\r\n  |> drop(fn: (column) => column == \"host\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> drop(fn: (column) => column == \"_measurement\")\r\n  //|> keep(columns: [\"_time\", \"pod_name\", \"pod_namespace\", \"connections\"])\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  //|> window(every: 30s)\r\n  //|> count(column: \"dest\")\r\n  //|> keep(columns: [\"_time\", \"source\", \"connections\"])\r\n  |> aggregateWindow(every: 30s, fn: sum, column: \"kilobytes\")",
           "refId": "A"
         }
       ],
@@ -111,8 +111,8 @@
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "(.*(pod_chart=\"(.*)\",).*(pod_name=\"(.*)\",).*)",
-            "renamePattern": "$5 chart($3)"
+            "regex": "(.*(pod_name=\"(.*)\",).*)",
+            "renamePattern": "$3"
           }
         }
       ],
@@ -194,17 +194,17 @@
             "type": "{{ datasource_type }}",
             "uid": "{{ datasource_uid }}"
           },
-          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"__x64_sys_write\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> filter(fn: (r) => r[\"pod_name\"] =~ /^*$/)\r\n  |> filter(fn: (r) => r[\"_field\"] == \"length\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({r with kilobytes:  float(v: r.length) / 1024.0}))\r\n  |> drop(fn: (column) => column == \"function\")\r\n  |> drop(fn: (column) => column == \"host\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> drop(fn: (column) => column == \"_measurement\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> aggregateWindow(every: 30s, fn: sum, column: \"kilobytes\")",
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"__x64_sys_write\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> filter(fn: (r) => r[\"pod_name\"] =~ /^*$/)\r\n  |> filter(fn: (r) => r[\"_field\"] == \"length\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({r with kilobytes:  float(v: r.length) / 1024.0}))\r\n  |> drop(fn: (column) => column == \"function\")\r\n  |> drop(fn: (column) => column == \"host\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> drop(fn: (column) => column == \"_measurement\")\r\n  //|> keep(columns: [\"_time\", \"pod_name\", \"pod_namespace\", \"connections\"])\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  //|> window(every: 30s)\r\n  //|> count(column: \"dest\")\r\n  //|> keep(columns: [\"_time\", \"source\", \"connections\"])\r\n  |> aggregateWindow(every: 30s, fn: sum, column: \"kilobytes\")",
           "refId": "A"
         }
       ],
-      "title": "$namespace: Kilobytes Written by Pod",
+      "title": "$namespace: Kilobytes Write by Pod",
       "transformations": [
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "(.*(pod_chart=\"(.*)\",).*(pod_name=\"(.*)\",).*)",
-            "renamePattern": "$5 chart($3)"
+            "regex": "(.*(pod_name=\"(.*)\",).*)",
+            "renamePattern": "$3"
           }
         }
       ],
@@ -285,7 +285,7 @@
             "type": "{{ datasource_type }}",
             "uid": "{{ datasource_uid }}"
           },
-          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_recvmsg\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> filter(fn: (r) => r[\"pod_name\"] =~ /^*$/)\r\n  |> filter(fn: (r) => r[\"_field\"] == \"length\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({r with kilobytes:  float(v: r.length)   / 1024.0}))\r\n  |> drop(fn: (column) => column == \"function\")\r\n  |> drop(fn: (column) => column == \"host\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> drop(fn: (column) => column == \"_measurement\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> aggregateWindow(every: 30s, fn: sum, column: \"kilobytes\")",
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_recvmsg\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> filter(fn: (r) => r[\"pod_name\"] =~ /^*$/)\r\n  |> filter(fn: (r) => r[\"_field\"] == \"length\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({r with kilobytes:  float(v: r.length)   / 1024.0}))\r\n  |> drop(fn: (column) => column == \"function\")\r\n  |> drop(fn: (column) => column == \"host\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> drop(fn: (column) => column == \"_measurement\")\r\n  //|> keep(columns: [\"_time\", \"pod_name\", \"pod_namespace\", \"connections\"])\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  //|> window(every: 30s)\r\n  //|> count(column: \"dest\")\r\n  //|> keep(columns: [\"_time\", \"source\", \"connections\"])\r\n  |> aggregateWindow(every: 30s, fn: sum, column: \"kilobytes\")",
           "refId": "A"
         }
       ],
@@ -294,8 +294,8 @@
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "(.*(pod_chart=\"(.*)\",).*(pod_name=\"(.*)\",).*)",
-            "renamePattern": "$5 chart($3)"
+            "regex": "(.*(pod_name=\"(.*)\",).*)",
+            "renamePattern": "$3"
           }
         }
       ],
@@ -376,7 +376,7 @@
             "type": "{{ datasource_type }}",
             "uid": "{{ datasource_uid }}"
           },
-          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_sendmsg\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> filter(fn: (r) => r[\"pod_name\"] =~ /^*$/)\r\n  |> filter(fn: (r) => r[\"_field\"] == \"length\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({r with kilobytes:  float(v: r.length) / 1024.0}))\r\n  |> drop(fn: (column) => column == \"function\")\r\n  |> drop(fn: (column) => column == \"host\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> drop(fn: (column) => column == \"_measurement\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> aggregateWindow(every: 30s, fn: sum, column: \"kilobytes\")",
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_sendmsg\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> filter(fn: (r) => r[\"pod_name\"] =~ /^*$/)\r\n  |> filter(fn: (r) => r[\"_field\"] == \"length\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({r with kilobytes:  float(v: r.length) / 1024.0}))\r\n  |> drop(fn: (column) => column == \"function\")\r\n  |> drop(fn: (column) => column == \"host\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> drop(fn: (column) => column == \"_measurement\")\r\n  //|> keep(columns: [\"_time\", \"pod_name\", \"pod_namespace\", \"connections\"])\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  //|> window(every: 30s)\r\n  //|> count(column: \"dest\")\r\n  //|> keep(columns: [\"_time\", \"source\", \"connections\"])\r\n  |> aggregateWindow(every: 30s, fn: sum, column: \"kilobytes\")",
           "refId": "A"
         }
       ],
@@ -385,8 +385,8 @@
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "(.*(pod_chart=\"(.*)\",).*(pod_name=\"(.*)\",).*)",
-            "renamePattern": "$5 chart($3)"
+            "regex": "(.*(pod_name=\"(.*)\",).*)",
+            "renamePattern": "$3"
           }
         }
       ],
@@ -468,7 +468,7 @@
             "type": "{{ datasource_type }}",
             "uid": "{{ datasource_uid }}"
           },
-          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_connect\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> filter(fn: (r) => r[\"pod_name\"] =~ /^*$/)\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({ r with connections: 1 }))\r\n  |> drop(fn: (column) => column == \"function\")\r\n  |> drop(fn: (column) => column == \"host\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> drop(fn: (column) => column == \"_measurement\")\r\n  |> keep(columns: [\"_time\", \"pod_name\", \"pod_chart\", \"pod_namespace\", \"connections\"])\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> aggregateWindow(every: 30s, fn: count, column: \"connections\")",
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_connect\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> filter(fn: (r) => r[\"pod_name\"] =~ /^*$/)\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({ r with connections: 1 }))\r\n  |> drop(fn: (column) => column == \"function\")\r\n  |> drop(fn: (column) => column == \"host\")\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  |> drop(fn: (column) => column == \"_measurement\")\r\n  |> keep(columns: [\"_time\", \"pod_name\", \"pod_namespace\", \"connections\"])\r\n  |> drop(fn: (column) => column == \"_start\")\r\n  |> drop(fn: (column) => column == \"_stop\")\r\n  //|> window(every: 30s)\r\n  //|> count(column: \"dest\")\r\n  //|> keep(columns: [\"_time\", \"source\", \"connections\"])\r\n  |> aggregateWindow(every: 30s, fn: count, column: \"connections\")",
           "refId": "A"
         }
       ],
@@ -477,8 +477,8 @@
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "(.*(pod_chart=\"(.*)\",).*(pod_name=\"(.*)\",).*)",
-            "renamePattern": "$5 chart($3)"
+            "regex": "(.*(pod_name=\"(.*)\",).*)",
+            "renamePattern": "$3"
           }
         }
       ],
@@ -536,7 +536,7 @@
             "type": "{{ datasource_type }}",
             "uid": "{{ datasource_uid }}"
           },
-          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_connect\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"sock_daddr\" \r\n    or r[\"_field\"] == \"sock_saddr\" or r[\"_field\"] == \"sock_dest_object\" or r[\"_field\"] == \"sock_src_object\"\r\n    or r[\"_field\"] == \"sock_src_chart\"\r\n    or r[\"_field\"] == \"sock_dest_chart\"\r\n    )\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({ r with connections: 1 }))\r\n  |> map(fn: (r) => ({ r with k8s_src: r.sock_src_object}))\r\n  |> map(fn: (r) => ({ r with k8s_dest: r.sock_dest_object}))\r\n  |> map(fn: (r) => ({ r with src: r.sock_saddr}))\r\n  |> map(fn: (r) => ({ r with dest: r.sock_daddr}))\r\n  |> keep(columns: [\"connections\", \"src\", \"k8s_src\", \"dest\", \"k8s_dest\", \"sock_src_chart\", \"sock_dest_chart\"])\r\n  |> group(columns: [\"src\", \"k8s_src\", \"dest\", \"k8s_dest\", \"sock_src_chart\", \"sock_dest_chart\"])\r\n  |> count(column: \"connections\")",
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_connect\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"sock_daddr\" \r\n    or r[\"_field\"] == \"sock_saddr\" or r[\"_field\"] == \"sock_dest_object\" or r[\"_field\"] == \"sock_src_object\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  //|> group(columns: [\"sock_daddr\", \"sock_dest_object\"])\r\n  |> map(fn: (r) => ({ r with connections: 1 }))\r\n  |> map(fn: (r) => ({ r with k8s_src: r.sock_src_object}))\r\n  |> map(fn: (r) => ({ r with k8s_dest: r.sock_dest_object}))\r\n  |> map(fn: (r) => ({ r with src: r.sock_saddr}))\r\n  |> map(fn: (r) => ({ r with dest: r.sock_daddr}))\r\n  |> keep(columns: [\"connections\", \"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> group(columns: [\"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> count(column: \"connections\")",
           "refId": "A"
         }
       ],
@@ -545,81 +545,8 @@
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "(.*(dest=\"(.*)\")(, )(k8s_dest=\"(.*)\")(, )(k8s_src=\"(.*)\")(, )(sock_dest_chart=\"(.*)\")(, )(sock_src_chart=\"(.*)\")(, )(src=\"(.*)\")}$)",
-            "renamePattern": "$18 -> $3, $9 chart($15) -> $6 chart($12)"
-          }
-        }
-      ],
-      "type": "piechart"
-    },
-    {
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
-          },
-          "mappings": []
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 24,
-        "x": 0,
-        "y": 36
-      },
-      "id": 14,
-      "options": {
-        "displayLabels": [
-          "value"
-        ],
-        "legend": {
-          "displayMode": "table",
-          "placement": "bottom",
-          "values": [
-            "value"
-          ]
-        },
-        "pieType": "pie",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "8.4.3",
-      "repeatDirection": "h",
-      "targets": [
-        {
-          "datasource": {
-            "type": "{{ datasource_type }}",
-            "uid": "{{ datasource_uid }}"
-          },
-          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_recvmsg\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"sock_daddr\" \r\n    or r[\"_field\"] == \"sock_saddr\" or r[\"_field\"] == \"sock_dest_object\" or r[\"_field\"] == \"sock_src_object\"\r\n    or r[\"_field\"] == \"sock_src_chart\"\r\n    or r[\"_field\"] == \"sock_dest_chart\"\r\n    )\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({ r with connections: 1 }))\r\n  |> map(fn: (r) => ({ r with k8s_src: r.sock_src_object}))\r\n  |> map(fn: (r) => ({ r with k8s_dest: r.sock_dest_object}))\r\n  |> map(fn: (r) => ({ r with src: r.sock_saddr}))\r\n  |> map(fn: (r) => ({ r with dest: r.sock_daddr}))\r\n  |> keep(columns: [\"connections\", \"src\", \"k8s_src\", \"dest\", \"k8s_dest\", \"sock_src_chart\", \"sock_dest_chart\"])\r\n  |> group(columns: [\"src\", \"k8s_src\", \"dest\", \"k8s_dest\", \"sock_src_chart\", \"sock_dest_chart\"])\r\n  |> count(column: \"connections\")",
-          "refId": "A"
-        }
-      ],
-      "title": "$namespace: TCP Receive Count",
-      "transformations": [
-        {
-          "id": "renameByRegex",
-          "options": {
-            "regex": "(.*(dest=\"(.*)\")(, )(k8s_dest=\"(.*)\")(, )(k8s_src=\"(.*)\")(, )(sock_dest_chart=\"(.*)\")(, )(sock_src_chart=\"(.*)\")(, )(src=\"(.*)\")}$)",
-            "renamePattern": "$3 -> $18, $6 chart($12) -> $9 chart($15)"
+            "regex": "(.*(dest=\"(\\d+\\.\\d+\\.\\d+\\.\\d+)\")(, )(k8s_dest=\"(.*)\")(, )(k8s_src=\"(.*)\")(, )(src=\"(.*)\")}$)",
+            "renamePattern": "$12 -> $3, $9 -> $6"
           }
         }
       ],
@@ -682,17 +609,25 @@
             "type": "{{ datasource_type }}",
             "uid": "{{ datasource_uid }}"
           },
-          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_sendmsg\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"sock_daddr\" \r\n    or r[\"_field\"] == \"sock_saddr\" or r[\"_field\"] == \"sock_dest_object\" \r\n    or r[\"_field\"] == \"sock_src_object\"\r\n    or r[\"_field\"] == \"sock_src_chart\"\r\n    or r[\"_field\"] == \"sock_dest_chart\"\r\n    )\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({ r with connections: 1 }))\r\n  |> map(fn: (r) => ({ r with k8s_src: r.sock_src_object}))\r\n  |> map(fn: (r) => ({ r with k8s_dest: r.sock_dest_object}))\r\n  |> map(fn: (r) => ({ r with src: r.sock_saddr}))\r\n  |> map(fn: (r) => ({ r with dest: r.sock_daddr}))\r\n  |> keep(columns: [\"connections\", \"src\", \"k8s_src\", \"dest\", \"k8s_dest\", \"sock_src_chart\", \"sock_dest_chart\"])\r\n  |> group(columns: [\"src\", \"k8s_src\", \"dest\", \"k8s_dest\", \"sock_src_chart\", \"sock_dest_chart\"])\r\n  |> count(column: \"connections\")",
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_sendmsg\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"sock_daddr\" \r\n    or r[\"_field\"] == \"sock_saddr\" or r[\"_field\"] == \"sock_dest_object\" or r[\"_field\"] == \"sock_src_object\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  //|> group(columns: [\"sock_daddr\", \"sock_dest_object\"])\r\n  |> map(fn: (r) => ({ r with connections: 1 }))\r\n  |> map(fn: (r) => ({ r with k8s_src: r.sock_src_object}))\r\n  |> map(fn: (r) => ({ r with k8s_dest: r.sock_dest_object}))\r\n  |> map(fn: (r) => ({ r with src: r.sock_saddr}))\r\n  |> map(fn: (r) => ({ r with dest: r.sock_daddr}))\r\n  |> keep(columns: [\"connections\", \"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> group(columns: [\"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> count(column: \"connections\")",
           "refId": "A"
         }
       ],
       "title": "$namespace: TCP Send Count",
       "transformations": [
         {
+          "disabled": true,
           "id": "renameByRegex",
           "options": {
-            "regex": "(.*(dest=\"(.*)\")(, )(k8s_dest=\"(.*)\")(, )(k8s_src=\"(.*)\")(, )(sock_dest_chart=\"(.*)\")(, )(sock_src_chart=\"(.*)\")(, )(src=\"(.*)\")}$)",
-            "renamePattern": "$18 -> $3, $9 chart($15) -> $6 chart($12)"
+            "regex": "((connections {)(.*)(}))",
+            "renamePattern": "$3"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*(dest=\"(\\d+\\.\\d+\\.\\d+\\.\\d+)\")(, )(k8s_dest=\"(.*)\")(, )(k8s_src=\"(.*)\")(, )(src=\"(.*)\")}$)",
+            "renamePattern": "$12 -> $3, $9 -> $6"
           }
         }
       ],
@@ -721,6 +656,79 @@
         "w": 24,
         "x": 0,
         "y": 58
+      },
+      "id": 14,
+      "options": {
+        "displayLabels": [
+          "value"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "values": [
+            "value"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "8.4.3",
+      "repeatDirection": "h",
+      "targets": [
+        {
+          "datasource": {
+            "type": "{{ datasource_type }}",
+            "uid": "{{ datasource_uid }}"
+          },
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_recvmsg\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"sock_daddr\" \r\n    or r[\"_field\"] == \"sock_saddr\" or r[\"_field\"] == \"sock_dest_object\" or r[\"_field\"] == \"sock_src_object\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  //|> group(columns: [\"sock_daddr\", \"sock_dest_object\"])\r\n  |> map(fn: (r) => ({ r with connections: 1 }))\r\n  |> map(fn: (r) => ({ r with k8s_src: r.sock_src_object}))\r\n  |> map(fn: (r) => ({ r with k8s_dest: r.sock_dest_object}))\r\n  |> map(fn: (r) => ({ r with src: r.sock_saddr}))\r\n  |> map(fn: (r) => ({ r with dest: r.sock_daddr}))\r\n  |> keep(columns: [\"connections\", \"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> group(columns: [\"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> count(column: \"connections\")",
+          "refId": "A"
+        }
+      ],
+      "title": "$namespace: TCP Receive Count",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "(.*(dest=\"(\\d+\\.\\d+\\.\\d+\\.\\d+)\")(, )(k8s_dest=\"(.*)\")(, )(k8s_src=\"(.*)\")(, )(src=\"(.*)\")}$)",
+            "renamePattern": "$3 -> $12, $6 -> $9"
+          }
+        }
+      ],
+      "type": "piechart"
+    },
+    {
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 69
       },
       "id": 12,
       "options": {
@@ -755,7 +763,7 @@
             "type": "{{ datasource_type }}",
             "uid": "{{ datasource_uid }}"
           },
-          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_sendmsg\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"sock_daddr\" or r[\"_field\"] == \"length\"\r\n    or r[\"_field\"] == \"sock_saddr\" or r[\"_field\"] == \"sock_dest_object\" \r\n    or r[\"_field\"] == \"sock_src_object\"\r\n    or r[\"_field\"] == \"sock_src_chart\"\r\n    or r[\"_field\"] == \"sock_dest_chart\"\r\n    )\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({ r with kilobytes: float(v: r.length) / 1024.}))\r\n  |> map(fn: (r) => ({ r with k8s_src: r.sock_src_object}))\r\n  |> map(fn: (r) => ({ r with k8s_dest: r.sock_dest_object}))\r\n  |> map(fn: (r) => ({ r with src: r.sock_saddr}))\r\n  |> map(fn: (r) => ({ r with dest: r.sock_daddr}))\r\n  |> keep(columns: [\"kilobytes\", \"src\", \"k8s_src\", \"dest\", \"k8s_dest\", \"sock_src_chart\", \"sock_dest_chart\"])\r\n  |> group(columns: [\"src\", \"k8s_src\", \"dest\", \"k8s_dest\", \"sock_src_chart\", \"sock_dest_chart\"])\r\n  |> sum(column: \"kilobytes\")",
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_sendmsg\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"sock_daddr\" or r[\"_field\"] == \"length\"\r\n    or r[\"_field\"] == \"sock_saddr\" or r[\"_field\"] == \"sock_dest_object\" or r[\"_field\"] == \"sock_src_object\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  //|> group(columns: [\"sock_daddr\", \"sock_dest_object\", \"length\"])\r\n  |> map(fn: (r) => ({ r with kilobytes: float(v: r.length) / 1024.}))\r\n  |> map(fn: (r) => ({ r with k8s_src: r.sock_src_object}))\r\n  |> map(fn: (r) => ({ r with k8s_dest: r.sock_dest_object}))\r\n  |> map(fn: (r) => ({ r with src: r.sock_saddr}))\r\n  |> map(fn: (r) => ({ r with dest: r.sock_daddr}))\r\n  |> keep(columns: [\"kilobytes\", \"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> group(columns: [\"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> sum(column: \"kilobytes\")",
           "refId": "A"
         }
       ],
@@ -764,8 +772,8 @@
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "(.*(dest=\"(.*)\")(, )(k8s_dest=\"(.*)\")(, )(k8s_src=\"(.*)\")(, )(sock_dest_chart=\"(.*)\")(, )(sock_src_chart=\"(.*)\")(, )(src=\"(.*)\")}$)",
-            "renamePattern": "$18 -> $3, $9 chart($15) -> $6 chart($12)"
+            "regex": "(.*(dest=\"(\\d+\\.\\d+\\.\\d+\\.\\d+)\")(, )(k8s_dest=\"(.*)\")(, )(k8s_src=\"(.*)\")(, )(src=\"(.*)\")}$)",
+            "renamePattern": "$12 -> $3, $9 -> $6"
           }
         }
       ],
@@ -828,7 +836,7 @@
             "type": "{{ datasource_type }}",
             "uid": "{{ datasource_uid }}"
           },
-          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_recvmsg\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"sock_daddr\" or r[\"_field\"] == \"length\"\r\n    or r[\"_field\"] == \"sock_saddr\" or r[\"_field\"] == \"sock_dest_object\" or r[\"_field\"] == \"sock_src_object\"\r\n    or r[\"_field\"] == \"sock_src_chart\"\r\n    or r[\"_field\"] == \"sock_dest_chart\"\r\n    )\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  |> map(fn: (r) => ({ r with kilobytes: float(v: r.length) / (1024. * 1024.)}))\r\n  |> map(fn: (r) => ({ r with k8s_src: r.sock_src_object}))\r\n  |> map(fn: (r) => ({ r with k8s_dest: r.sock_dest_object}))\r\n  |> map(fn: (r) => ({ r with src: r.sock_saddr}))\r\n  |> map(fn: (r) => ({ r with dest: r.sock_daddr}))\r\n  |> keep(columns: [\"kilobytes\", \"src\", \"k8s_src\", \"dest\", \"k8s_dest\", \"sock_src_chart\", \"sock_dest_chart\"])\r\n  |> group(columns: [\"src\", \"k8s_src\", \"dest\", \"k8s_dest\", \"sock_src_chart\", \"sock_dest_chart\"])\r\n  |> sum(column: \"kilobytes\")",
+          "query": "from(bucket: \"telegraf\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"function\"] == \"tcp_recvmsg\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"sock_daddr\" or r[\"_field\"] == \"length\"\r\n    or r[\"_field\"] == \"sock_saddr\" or r[\"_field\"] == \"sock_dest_object\" or r[\"_field\"] == \"sock_src_object\")\r\n  |> filter(fn: (r) => r[\"pod_namespace\"] == \"$namespace\")\r\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\r\n  //|> group(columns: [\"sock_daddr\", \"sock_dest_object\", \"length\"])\r\n  |> map(fn: (r) => ({ r with kilobytes: float(v: r.length) / (1024. * 1024.)}))\r\n  |> map(fn: (r) => ({ r with k8s_src: r.sock_src_object}))\r\n  |> map(fn: (r) => ({ r with k8s_dest: r.sock_dest_object}))\r\n  |> map(fn: (r) => ({ r with src: r.sock_saddr}))\r\n  |> map(fn: (r) => ({ r with dest: r.sock_daddr}))\r\n  |> keep(columns: [\"kilobytes\", \"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> group(columns: [\"src\", \"k8s_src\", \"dest\", \"k8s_dest\"])\r\n  |> sum(column: \"kilobytes\")",
           "refId": "A"
         }
       ],
@@ -837,8 +845,8 @@
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "(.*(dest=\"(.*)\")(, )(k8s_dest=\"(.*)\")(, )(k8s_src=\"(.*)\")(, )(sock_dest_chart=\"(.*)\")(, )(sock_src_chart=\"(.*)\")(, )(src=\"(.*)\")}$)",
-            "renamePattern": "$3 -> $18, $6 chart($12) -> $9 chart($15)"
+            "regex": "(.*(dest=\"(\\d+\\.\\d+\\.\\d+\\.\\d+)\")(, )(k8s_dest=\"(.*)\")(, )(k8s_src=\"(.*)\")(, )(src=\"(.*)\")}$)",
+            "renamePattern": "$3 -> $12, $6 -> $9"
           }
         }
       ],
@@ -882,13 +890,13 @@
     ]
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "{{ title }}",
   "uid": "{{ uid }}",
-  "version": 101,
+  "version": 77,
   "weekStart": ""
 }
