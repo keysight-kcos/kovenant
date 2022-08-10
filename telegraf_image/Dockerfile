@@ -4,8 +4,10 @@ COPY ./kubectl /kubectl
 RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 RUN usermod -g 0 telegraf
 RUN apt-get update && apt-get install -y --no-install-recommends python3
+RUN wget https://get.helm.sh/helm-v3.9.2-linux-amd64.tar.gz && tar -zxvf helm*.gz && install -o root -g root -m 0755 linux-amd64/helm /usr/bin/helm && rm -rf *linux-amd64*
 COPY ./config /.kube/config
-COPY ./pod_ip_mapping /usr/bin/pod_ip_mapping
+COPY ./helm /root/.config/helm
 COPY ./ips_to_pods.sh /usr/bin/ips_to_pods.sh
+COPY ./get_helm.sh /usr/bin/get_helm.sh
 COPY ./log_filter.py /usr/bin/log_filter.py
 COPY ./filtered_tetragon_logs.sh /usr/bin/filtered_tetragon_logs.sh
