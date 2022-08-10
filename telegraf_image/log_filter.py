@@ -194,7 +194,9 @@ def get_sock_info(args):
 	return ret
 
 def main(): 
+	#os.seteuid(0)
 	set_helm_map()
+	print(helm_map, file=sys.stderr)
 	pods_to_charts()
 	set_pod_ip_map()
 

@@ -3,7 +3,7 @@
 import sys, json, os, time
 
 IPS_TO_PODS_PATH = "/usr/bin/ips_to_pods.sh"
-GET_HELM_PATH = "./get_helm.sh"
+GET_HELM_PATH = "/usr/bin/get_helm.sh"
 UPDATE_INTERVAL = 30
 ip_map = {}
 helm_map = {}
@@ -194,7 +194,9 @@ def get_sock_info(args):
 	return ret
 
 def main(): 
+	#os.seteuid(0)
 	set_helm_map()
+	print(helm_map, file=sys.stderr)
 	pods_to_charts()
 	set_pod_ip_map()
 
