@@ -1,0 +1,59 @@
+services:
+  grafana:
+    depends_on:
+    - influxdb
+    image: grafana/grafana-oss:8.4.3
+    ports:
+    - 3000:3000/tcp
+    volumes:
+    - grafana-storage:/var/lib/grafana:rw
+  influxdb:
+    entrypoint:
+    - ./entrypoint.sh
+    environment:
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: 346acdabf80634488c8013c4d0e96136396f0777127a1dde1ad43ec2675af7a0
+      DOCKER_INFLUXDB_INIT_BUCKET: telegraf
+      DOCKER_INFLUXDB_INIT_HOST: localhost
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_ORG: ricefrog
+      DOCKER_INFLUXDB_INIT_PASSWORD: password123
+      DOCKER_INFLUXDB_INIT_PORT: '8086'
+      DOCKER_INFLUXDB_INIT_RETENTION: 4d
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      GRAFANA_PORT: '3000'
+      KUBECONFIG: /.kube/config
+      KUBE_CONFIG_PATH: '~/.kube/config # config on local machine to be copied to
+        image'
+      TELEGRAF_CFG_PATH: ./telegraf/telegraf.conf
+    image: influxdb:2.1.1
+    ports:
+    - 8086:8086/tcp
+    volumes:
+    - influxdb-storage:/var/lib/influxdb2:rw
+  telegraf:
+    depends_on:
+    - influxdb
+    environment:
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: 346acdabf80634488c8013c4d0e96136396f0777127a1dde1ad43ec2675af7a0
+      DOCKER_INFLUXDB_INIT_BUCKET: telegraf
+      DOCKER_INFLUXDB_INIT_HOST: localhost
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_ORG: ricefrog
+      DOCKER_INFLUXDB_INIT_PASSWORD: password123
+      DOCKER_INFLUXDB_INIT_PORT: '8086'
+      DOCKER_INFLUXDB_INIT_RETENTION: 4d
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      GRAFANA_PORT: '3000'
+      KUBECONFIG: /.kube/config
+      KUBE_CONFIG_PATH: '~/.kube/config # config on local machine to be copied to
+        image'
+      TELEGRAF_CFG_PATH: ./telegraf/telegraf.conf
+    image: telegraf_with_kube
+    network_mode: host
+    volumes:
+    - /root/tetragon-dashboard/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:rw
+version: '3.0'
+volumes:
+  grafana-storage: {}
+  influxdb-storage: {}
+

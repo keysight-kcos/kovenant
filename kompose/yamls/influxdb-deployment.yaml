@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose-resolved.yaml
+    kompose.version: 1.26.1 (a9d05d509)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: influxdb
+  name: influxdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: influxdb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f docker-compose-resolved.yaml
+        kompose.version: 1.26.1 (a9d05d509)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: influxdb
+    spec:
+      containers:
+        - command:
+            - ./entrypoint.sh
+          env:
+            - name: DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
+              value: 346acdabf80634488c8013c4d0e96136396f0777127a1dde1ad43ec2675af7a0
+            - name: DOCKER_INFLUXDB_INIT_BUCKET
+              value: telegraf
+            - name: DOCKER_INFLUXDB_INIT_HOST
+              value: localhost
+            - name: DOCKER_INFLUXDB_INIT_MODE
+              value: setup
+            - name: DOCKER_INFLUXDB_INIT_ORG
+              value: ricefrog
+            - name: DOCKER_INFLUXDB_INIT_PASSWORD
+              value: password123
+            - name: DOCKER_INFLUXDB_INIT_PORT
+              value: "8086"
+            - name: DOCKER_INFLUXDB_INIT_RETENTION
+              value: 4d
+            - name: DOCKER_INFLUXDB_INIT_USERNAME
+              value: admin
+            - name: GRAFANA_PORT
+              value: "3000"
+            - name: KUBECONFIG
+              value: /.kube/config
+            - name: KUBE_CONFIG_PATH
+              value: '~/.kube/config # config on local machine to be copied to image'
+            - name: TELEGRAF_CFG_PATH
+              value: ./telegraf/telegraf.conf
+          image: influxdb:2.1.1
+          name: influxdb
+          ports:
+            - containerPort: 8086
+          resources: {}
+          volumeMounts:
+            - mountPath: /var/lib/influxdb2
+              name: influxdb-storage
+      restartPolicy: Always
+      volumes:
+        - name: influxdb-storage
+          persistentVolumeClaim:
+            claimName: influxdb-storage
+status: {}

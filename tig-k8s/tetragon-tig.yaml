@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tetragon-tig
+spec:
+  containers:
+	- name: telegraf
+		image: telegraf_with_kube
+	- name: influxdb
+		image: influxdb:2.1.1
+	- name: grafana
+		image: grafana/grafana-oss:8.4.3
+
