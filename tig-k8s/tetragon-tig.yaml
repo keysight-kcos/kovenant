@@ -3,11 +3,33 @@ kind: Pod
 metadata:
   name: tetragon-tig
 spec:
+  restartPolicy: OnFailure
   containers:
-	- name: telegraf
-		image: telegraf_with_kube
-	- name: influxdb
-		image: influxdb:2.1.1
-	- name: grafana
-		image: grafana/grafana-oss:8.4.3
+    - name: telegraf
+      # locally built image
+      image: telegraf-tetragon-tig
+      imagePullPolicy: Never
+      envFrom:
+        - configMapRef:
+            name: tetragon-tig-env
+
+    - name: influxdb
+      image: influxdb:2.1.1
+      #image: influxdb-tetragon-tig
+      #imagePullPolicy: Never
+      command: ["/entrypoint.sh"]
+      envFrom:
+        - configMapRef:
+            name: tetragon-tig-env
+      ports:
+        - name: influx-port
+          containerPort: 8086
+          protocol: TCP
+
+    - name: grafana
+      image: grafana/grafana-oss:8.4.3
+      ports:
+        - name: grafana-port
+          containerPort: 3000
+          protocol: TCP
 

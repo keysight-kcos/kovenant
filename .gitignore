@@ -1,6 +1,7 @@
-telegraf_image/config
-telegraf_image/kubectl
-telegraf_image/helm
+*telegraf_image/config
+*telegraf_image/kubectl
+*telegraf_image/helm
 __pycache__
 __pycache__/*
 dashboard_templating/.env
+*env*yaml
