@@ -1,0 +1,28 @@
+repositories:
+ - name: grafana
+   url: https://grafana.github.io/helm-charts
+
+releases:
+- name: tetragon-grafana
+  namespace: default
+  chart: grafana/grafana
+  values:
+    - 
+      service:
+        port: 3000
+      ingress:
+        enabled: true
+        path: "/grafana(/|$)(.*)"
+        hosts: []
+        annotations:
+          nginx.ingress.kubernetes.io/rewrite-target: /$2
+      grafana.ini:
+        analytics:
+          check_for_updates: false
+          check_for_plugin_updates: false
+          feedback_links_enabled: false
+          reporting_enabled: false
+        server:
+          root_url: "%(protocol)s://%(domain)s:%(http_port)s/grafana/"
+          serve_from_sub_path: true
+          enable_gzip: "true"
