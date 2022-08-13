@@ -18,7 +18,7 @@ TITLE = "tetragon-"+os.uname()[1]
 DATASOURCE_TYPE = "influxdb"
 DATASOURCE_UID = "KyNwf_zVk" 
 API_KEY = os.getenv("GRAFANA_API_KEY")
-BASE_URL = "http://localhost:3000/api/"
+BASE_URL = "http://localhost/grafana/api/"
 
 def get(url):
 	res = requests.get(url=url, headers={"Authorization": f"Bearer {API_KEY}"})

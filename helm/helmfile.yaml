@@ -8,6 +8,21 @@ releases:
   chart: grafana/grafana
   values:
     - 
+      datasources: 
+        datasources.yaml:
+          apiVersion: 1
+          datasources:
+            - name: InfluxDB
+              # Based on https://grafana.com/docs/grafana/latest/datasources/influxdb/provision-influxdb/
+              type: influxdb
+              url: http://tetragon-ti-service:8086
+              #secureJsonData:
+                #token: "iadmintoken"
+              jsonData:
+                version: Flux
+                organization: 
+                defaultBucket: 
+      adminPassword: "admin"
       service:
         port: 3000
       ingress:
@@ -26,3 +41,7 @@ releases:
           root_url: "%(protocol)s://%(domain)s:%(http_port)s/grafana/"
           serve_from_sub_path: true
           enable_gzip: "true"
+
+- name: tetragon-ti
+  namespace: default
+  chart: ./tetragon-ti
