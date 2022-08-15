@@ -63,6 +63,7 @@ releases:
   chart: ./tetragon-ti
   needs:
   - kube-system/tetragon
+  - default/tetragon-grafana
   values:
     - 
       env:
