@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  {{- range $temp := .Values.env }} 
+  {{ $temp.name }}: "{{ $temp.value }}"
+  {{- end }}
+kind: ConfigMap
+metadata:
+  name: tetragon-ti-env
+  namespace: default

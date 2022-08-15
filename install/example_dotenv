@@ -1,3 +1,4 @@
+# openssl rand -hex 32 to generate a token
 DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=346acdabfxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx1ad43ec2675af7a0
 DOCKER_INFLUXDB_INIT_BUCKET=Tetragon
 DOCKER_INFLUXDB_INIT_HOST=localhost
