@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+mkdir .kube
+cp /temp/kubeconfig .kube/config
+chmod 0666 .kube/config
+
 get_helm.sh > helm_releases
 cat <<EOF > /usr/bin/get_helm.sh
 #!/bin/bash

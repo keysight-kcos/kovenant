@@ -11,6 +11,12 @@ spec:
       # locally built image
       image: telegraf-tetragon-ti
       imagePullPolicy: Never
+      volumeMounts:
+      #- mountPath: /.kube/config
+      - mountPath: /temp/kubeconfig
+        name: kubeconfig
+      - mountPath: /root/.config/helm
+        name: helm
       envFrom:
         - configMapRef:
             name: tetragon-ti-env
@@ -27,3 +33,12 @@ spec:
         - name: influx-port
           containerPort: 8086
           protocol: TCP
+  volumes:
+  - name: kubeconfig
+    hostPath:
+      path: {{ .Values.kubeconfig_mount_path }}
+      type: File
+  - name: helm
+    hostPath:
+      path: {{ .Values.helm_mount_path }}
+      type: Directory

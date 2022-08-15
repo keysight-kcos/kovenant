@@ -9,3 +9,4 @@ __pycache__/*
 dashboard_templating/.env
 tetragon-tig-env.yaml
 *env.yaml
+*.env

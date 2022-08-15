@@ -70,3 +70,5 @@ releases:
           value: {{ requiredEnv "GRAFANA_PORT" }}
         - name: KUBECONFIG
           value: {{ requiredEnv "TELEGRAF_KUBECONFIG" }}
+      kubeconfig_mount_path: {{ env "KUBECONFIG_MOUNT_PATH" | default "/root/.kube/config" }} 
+      helm_mount_path: {{ env "HELM_MOUNT_PATH" | default "/root/.config/helm" }} 
