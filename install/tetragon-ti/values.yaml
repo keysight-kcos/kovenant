@@ -1,0 +1,26 @@
+env: 
+  - name: DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
+    value: uninitialized
+  - name: DOCKER_INFLUXDB_INIT_BUCKET
+    value: uninitialized
+  - name: DOCKER_INFLUXDB_INIT_HOST
+    value: uninitialized
+  - name: DOCKER_INFLUXDB_INIT_MODE
+    value: uninitialized
+  - name: DOCKER_INFLUXDB_INIT_ORG
+    value: uninitialized
+  - name: DOCKER_INFLUXDB_INIT_PASSWORD
+    value: uninitialized
+  - name: DOCKER_INFLUXDB_INIT_PORT
+    value: 8086
+  - name: DOCKER_INFLUXDB_INIT_RETENTION
+    value: uninitialized
+  - name: DOCKER_INFLUXDB_INIT_USERNAME
+    value: uninitialized
+  - name: GRAFANA_PORT
+    value: 3000
+  - name: KUBECONFIG
+    value: /.kube/config
+
+kubeconfig_mount_path: "/root/.kube/config"
+helm_mount_path: "/root/.config/helm"

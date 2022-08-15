@@ -1,2 +1,0 @@
-#docker run --rm -p 44848:44847 -v ~/.kube/config:/etc/kubernetes/admin.conf -e KUBECONFIG=/etc/kubernetes/admin.conf telegraf_with_kube
-docker run --rm --net="host" -e KUBECONFIG=/.kube/config telegraf_with_kube
