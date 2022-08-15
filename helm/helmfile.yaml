@@ -1,11 +1,27 @@
 repositories:
+ - name: cilium
+   url: https://helm.cilium.io
  - name: grafana
    url: https://grafana.github.io/helm-charts
 
 releases:
+- name: tetragon
+  namespace: kube-system
+  chart: cilium/tetragon
+  hooks:
+  - events: ["postsync"]
+    command: kubectl
+    args:
+      - apply
+      {{- range $0, $path := readDir "./tracingpolicies" }}
+      - "-f"
+      - {{ $path }}
+      {{- end }}
 - name: tetragon-grafana
   namespace: default
   chart: grafana/grafana
+  needs:
+  - kube-system/tetragon
   values:
     - 
       datasources: 
@@ -45,6 +61,8 @@ releases:
 - name: tetragon-ti
   namespace: default
   chart: ./tetragon-ti
+  needs:
+  - kube-system/tetragon
   values:
     - 
       env:
