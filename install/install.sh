@@ -5,6 +5,7 @@ RES=""
 
 ./with_dotenv.sh helmfile apply
 
+echo "Waiting for Grafana deployment to finish rollout..."
 kubectl wait deployment $DEPLOYMENT_NAME --for condition=Available=True
 
 RES=$(curl -s -o /dev/null -I -w "%{http_code}" localhost/grafana)
