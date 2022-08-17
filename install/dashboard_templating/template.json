@@ -511,8 +511,11 @@
       "id": 2,
       "options": {
         "legend": {
-          "displayMode": "list",
-          "placement": "bottom"
+          "displayMode": "table",
+          "placement": "bottom",
+          "values": [
+            "value"
+          ]
         },
         "pieType": "pie",
         "reduceOptions": {
