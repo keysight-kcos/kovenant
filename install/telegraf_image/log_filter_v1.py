@@ -4,7 +4,6 @@ import sys, json, os, time
 
 IPS_TO_PODS_PATH = "/usr/bin/ips_to_pods.sh"
 GET_HELM_PATH = "/usr/bin/get_helm.sh"
-GET_CLUSTER_DNS_PATH = "/usr/bin/get_cluster_dns.sh"
 UPDATE_INTERVAL = 30
 ip_map = {}
 helm_map = {}
@@ -147,10 +146,6 @@ def set_pod_ip_map():
 	control_plane_ip = lines[0].strip()
 	new_ip_map[control_plane_ip] = "control-plane"
 
-	stream = os.popen(GET_CLUSTER_DNS_PATH)
-	cluster_dns_ip = stream.read().strip()
-	new_ip_map[cluster_dns_ip] = "Cluster-DNS"
-
 	for i in range(1, len(lines)):
 		name, ip = lines[i].split()
 		if ip == control_plane_ip:
@@ -198,53 +193,17 @@ def get_sock_info(args):
 
 	return ret
 
-def get_skb_info(args):
-	skb = args[0]["skb_arg"]
-	ret = {}
-	saddr, daddr = skb.get("saddr", "none"), skb.get("daddr", "none")
-	sport, dport = skb.get("sport", "none"), skb.get("dport", "none")
-
-	ret["saddr"] = saddr
-	ret["daddr"] = daddr
-	ret["sport"] = sport
-	ret["dport"] = dport
-	ret["src"] = saddr+":"+str(sport)
-	ret["dest"] = daddr+":"+str(dport)
-	check_update_ip_map()
-	ret["src_object"] = ip_to_pod_name(saddr)
-	ret["dest_object"] = ip_to_pod_name(daddr)
-	ret["src_chart"] = pod_name_to_chart(ret["src_object"])
-	ret["dest_chart"] = pod_name_to_chart(ret["dest_object"])
-
-	return ret
-
-def in_aggregate_window(start_of_window):
-	window_length = 5
-	return time.time() - start_of_window < window_length
-
-def contains_cluster_dns_ip(cluster_dns_ip, new_log_obj):
-	if "sock" in new_log_obj:
-		return new_log_obj["sock"]["saddr"] == cluster_dns_ip or new_log_obj["sock"]["daddr"] == cluster_dns_ip
-	return new_log_obj["skb"]["saddr"] == cluster_dns_ip or new_log_obj["skb"]["daddr"] == cluster_dns_ip
-
 def main(): 
 	#os.seteuid(0)
 	set_helm_map()
-	#print(helm_map, file=sys.stderr)
+	print(helm_map, file=sys.stderr)
 	pods_to_charts()
 	set_pod_ip_map()
 
-	stream = os.popen(GET_CLUSTER_DNS_PATH)
-	cluster_dns_ip = stream.read().strip()
-
-	start_of_window = time.time()
-
-	tcp_sendmsg_agg = {}
-	tcp_recvmsg_agg = {}
 	for line in sys.stdin:
 		log_obj = json.loads(line)
 		if "process_kprobe" in log_obj:
-			log_time = log_obj["time"]
+			time = log_obj["time"]
 			log_obj = log_obj["process_kprobe"]
 			fn_name = log_obj["function_name"]
 			new_log_obj = {}
@@ -254,92 +213,24 @@ def main():
 					"pod": get_pod_info(log_obj["process"]["pod"]),
 					"sock": get_sock_info(log_obj["args"]),
 				}
-				new_log_obj["time"] = log_time
-				print(json.dumps(new_log_obj))
-			elif fn_name == "tcp_sendmsg":
+				new_log_obj["time"] = time
+			elif fn_name == "tcp_sendmsg" or fn_name == "tcp_recvmsg":
 				new_log_obj = {
 					"function": fn_name,
 					"pod": get_pod_info(log_obj["process"]["pod"]),
 					"sock": get_sock_info(log_obj["args"]),
 					"length": int(log_obj["args"][1]["size_arg"]),
 				}
-
-				if not contains_cluster_dns_ip(cluster_dns_ip, new_log_obj):
-					signature = new_log_obj["sock"]["src"] + new_log_obj["sock"]["dest"]
-					if signature in tcp_sendmsg_agg:
-						tcp_sendmsg_agg[signature]["count"] += 1
-						tcp_sendmsg_agg[signature]["length"] += new_log_obj["length"]
-					else:
-						new_log_obj["count"] = 1
-						tcp_sendmsg_agg[signature] = new_log_obj
-					tcp_sendmsg_agg[signature]["time"] = log_time
-
-			elif fn_name == "tcp_recvmsg":
-				new_log_obj = {
-					"function": fn_name,
-					"pod": get_pod_info(log_obj["process"]["pod"]),
-					"sock": get_sock_info(log_obj["args"]),
-					"length": int(log_obj["args"][1]["size_arg"]),
-				}
-
-				signature = new_log_obj["sock"]["src"] + new_log_obj["sock"]["dest"] + new_log_obj["pod"]["namespace"] + new_log_obj["pod"]["name"]
-				if signature in tcp_recvmsg_agg:
-					tcp_recvmsg_agg[signature]["count"] += 1
-					tcp_recvmsg_agg[signature]["length"] += new_log_obj["length"]
-				else:
-					new_log_obj["count"] = 1
-					tcp_recvmsg_agg[signature] = new_log_obj
-				tcp_recvmsg_agg[signature]["time"] = log_time
-
+				new_log_obj["time"] = time
 			elif fn_name == "__x64_sys_read" or fn_name == "__x64_sys_write":
 				new_log_obj = {
 					"function": fn_name,
 					"pod": get_pod_info(log_obj["process"]["pod"]),
 					"length": int(log_obj["args"][0]["size_arg"]),
 				}
-				new_log_obj["time"] = log_time
-				print(json.dumps(new_log_obj))
-
-			"""
-			elif fn_name == "netif_receive_skb":
-				new_log_obj = {
-					"function": fn_name,
-					"pod": get_pod_info(log_obj["process"]["pod"]),
-					"skb": get_skb_info(log_obj["args"]),
-					"length": int(log_obj["args"][0]["skb_arg"]["len"]),
-				}
-
-				if not contains_cluster_dns_ip(cluster_dns_ip, new_log_obj):
-					signature = new_log_obj["skb"]["src"] + new_log_obj["skb"]["dest"]
-					if signature in tcp_recv_agg:
-						tcp_recv_agg[signature]["count"] += 1
-						tcp_recv_agg[signature]["length"] += new_log_obj["length"]
-					else:
-						new_log_obj["count"] = 1
-						tcp_recv_agg[signature] = new_log_obj
-					tcp_recv_agg[signature]["time"] = log_time
-				new_log_obj["time"] = log_time
-				print(json.dumps(new_log_obj))
-
-			elif fn_name == "tcp_v4_rcv":
-				new_log_obj = {
-					"function": fn_name,
-					"pod": get_pod_info(log_obj["process"]["pod"]),
-					"skb": get_skb_info(log_obj["args"]),
-					"length": int(log_obj["args"][0]["skb_arg"]["len"]),
-				}
-				new_log_obj["time"] = log_time
-				print(json.dumps(new_log_obj))
-
-			"""
-
-			if not in_aggregate_window(start_of_window):
-				start_of_window = time.time()
-				for _, obj in tcp_sendmsg_agg.items():
-					print(json.dumps(obj))
-				tcp_sendmsg_agg = {}
-				for _, obj in tcp_recvmsg_agg.items():
-					print(json.dumps(obj))
-				tcp_recvmsg_agg = {}
+				new_log_obj["time"] = time
+			else:
+				continue
+			print(json.dumps(new_log_obj))
 
 main()
