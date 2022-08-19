@@ -8,6 +8,9 @@ releases:
 - name: tetragon
   namespace: kube-system
   chart: cilium/tetragon
+  values:
+    -
+      exportAllowList: ""
   hooks:
   - events: ["postsync"]
     command: kubectl

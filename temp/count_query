@@ -1,0 +1,19 @@
+from(bucket: "Tetragon")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["function"] == "tcp_recvmsg")
+  |> filter(fn: (r) => r["_field"] == "sock_daddr" 
+    or r["_field"] == "sock_saddr" or r["_field"] == "sock_dest_object" or r["_field"] == "sock_src_object"
+    or r["_field"] == "sock_src_chart"
+    or r["_field"] == "sock_dest_chart"
+    or r["_field"] == "count"
+    )
+  |> filter(fn: (r) => r["pod_namespace"] == "$namespace")
+  |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+  //|> map(fn: (r) => ({ r with connections: 1 }))
+  |> map(fn: (r) => ({ r with k8s_src: r.sock_src_object}))
+  |> map(fn: (r) => ({ r with k8s_dest: r.sock_dest_object}))
+  |> map(fn: (r) => ({ r with src: r.sock_saddr}))
+  |> map(fn: (r) => ({ r with dest: r.sock_daddr}))
+  |> keep(columns: ["count", "src", "k8s_src", "dest", "k8s_dest", "sock_src_chart", "sock_dest_chart"])
+  |> group(columns: ["src", "k8s_src", "dest", "k8s_dest", "sock_src_chart", "sock_dest_chart"])
+  |> sum(column: "count")

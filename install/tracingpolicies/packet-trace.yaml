@@ -4,6 +4,11 @@ metadata:
   name: "packets"
 spec:
   kprobes:
+    # - call: "netdev_start_xmit"
+    #syscall: false
+    #args:
+    #  - index: 0
+    #    type: "skb"
   - call: "dev_queue_xmit"
     syscall: false
     args:
@@ -19,3 +24,9 @@ spec:
     args:
      - index: 0
        type: "skb"
+  #tracepoints:
+  #- event: "netif_rx"
+  #  subsystem: "net"
+  #  args:
+  #   - index: 0
+  #     type: "skb"

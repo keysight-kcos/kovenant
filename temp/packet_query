@@ -1,0 +1,18 @@
+from(bucket: "Tetragon")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["function"] == "tcp_v4_rcv")
+  |> filter(fn: (r) => r["_field"] == "skb_daddr" or r["_field"] == "length"
+    or r["_field"] == "skb_saddr" or r["_field"] == "skb_dest_object" or r["_field"] == "skb_src_object"
+    or r["_field"] == "skb_src_chart"
+    or r["_field"] == "skb_dest_chart"
+    )
+  |> filter(fn: (r) => r["pod_namespace"] == "$namespace")
+  |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+  |> map(fn: (r) => ({ r with kilobytes: float(v: r.length) / (1024.)}))
+  |> map(fn: (r) => ({ r with k8s_src: r.skb_src_object}))
+  |> map(fn: (r) => ({ r with k8s_dest: r.skb_dest_object}))
+  |> map(fn: (r) => ({ r with src: r.skb_saddr}))
+  |> map(fn: (r) => ({ r with dest: r.skb_daddr}))
+  |> keep(columns: ["kilobytes", "src", "k8s_src", "dest", "k8s_dest", "skb_src_chart", "skb_dest_chart", "pod_name"])
+  |> group(columns: ["src", "k8s_src", "dest", "k8s_dest", "skb_src_chart", "skb_dest_chart", "pod_name"])
+  |> sum(column: "kilobytes")

@@ -193,6 +193,10 @@ def get_sock_info(args):
 
 	return ret
 
+def in_aggregate_window(start_of_window):
+	window_length = 10
+	return time.time() - start_of_window < window_length
+
 def main(): 
 	#os.seteuid(0)
 	set_helm_map()
@@ -200,10 +204,14 @@ def main():
 	pods_to_charts()
 	set_pod_ip_map()
 
+	start_of_window = time.time()
+
+	tcp_sendmsg_agg = {}
+	tcp_recvmsg_agg = {}
 	for line in sys.stdin:
 		log_obj = json.loads(line)
 		if "process_kprobe" in log_obj:
-			time = log_obj["time"]
+			log_time = log_obj["time"]
 			log_obj = log_obj["process_kprobe"]
 			fn_name = log_obj["function_name"]
 			new_log_obj = {}
@@ -213,24 +221,56 @@ def main():
 					"pod": get_pod_info(log_obj["process"]["pod"]),
 					"sock": get_sock_info(log_obj["args"]),
 				}
-				new_log_obj["time"] = time
-			elif fn_name == "tcp_sendmsg" or fn_name == "tcp_recvmsg":
+				new_log_obj["time"] = log_time
+				print(json.dumps(new_log_obj))
+			elif fn_name == "tcp_sendmsg":
 				new_log_obj = {
 					"function": fn_name,
 					"pod": get_pod_info(log_obj["process"]["pod"]),
 					"sock": get_sock_info(log_obj["args"]),
 					"length": int(log_obj["args"][1]["size_arg"]),
 				}
-				new_log_obj["time"] = time
+
+				signature = new_log_obj["sock"]["src"] + new_log_obj["sock"]["dest"]
+				if signature in tcp_sendmsg_agg:
+					tcp_sendmsg_agg[signature]["count"] += 1
+					tcp_sendmsg_agg[signature]["length"] += new_log_obj["length"]
+				else:
+					new_log_obj["count"] = 1
+					tcp_sendmsg_agg[signature] = new_log_obj
+				tcp_sendmsg_agg[signature]["time"] = log_time
+
+			elif fn_name == "tcp_recvmsg":
+				new_log_obj = {
+					"function": fn_name,
+					"pod": get_pod_info(log_obj["process"]["pod"]),
+					"sock": get_sock_info(log_obj["args"]),
+					"length": int(log_obj["args"][1]["size_arg"]),
+				}
+
+				signature = new_log_obj["sock"]["src"] + new_log_obj["sock"]["dest"]
+				if signature in tcp_recvmsg_agg:
+					tcp_recvmsg_agg[signature]["count"] += 1
+					tcp_recvmsg_agg[signature]["length"] += new_log_obj["length"]
+				else:
+					new_log_obj["count"] = 1
+					tcp_recvmsg_agg[signature] = new_log_obj
+				tcp_recvmsg_agg[signature]["time"] = log_time
+
 			elif fn_name == "__x64_sys_read" or fn_name == "__x64_sys_write":
 				new_log_obj = {
 					"function": fn_name,
 					"pod": get_pod_info(log_obj["process"]["pod"]),
 					"length": int(log_obj["args"][0]["size_arg"]),
 				}
-				new_log_obj["time"] = time
-			else:
-				continue
-			print(json.dumps(new_log_obj))
+				new_log_obj["time"] = log_time
+				print(json.dumps(new_log_obj))
+
+			if not in_aggregate_window(start_of_window):
+				start_of_window = time.time()
+				for _, obj in tcp_sendmsg_agg.items():
+					print(json.dumps(obj))
+				for _, obj in tcp_recvmsg_agg.items():
+					print(json.dumps(obj))
 
 main()
