@@ -16,6 +16,6 @@ do
 	RES=$(curl -s -o /dev/null -I -w "%{http_code}" localhost/grafana)
 done
 
-echo "Attempting to generate and upload dashboard..."
+echo "Attempting to generate and upload dashboards..."
 cd ./dashboard_templating 
 ./generate_dashboard.py
