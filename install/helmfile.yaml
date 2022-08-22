@@ -42,6 +42,14 @@ releases:
       - "-f"
       - {{ $path }}
       {{- end }}
+  - events: ["postuninstall"]
+    command: kubectl
+    args:
+      - delete
+      {{- range $0, $path := readDir "./tracingpolicies" }}
+      - "-f"
+      - {{ $path }}
+      {{- end }}
 - name: tetragon-grafana
   namespace: default
   chart: grafana/grafana
