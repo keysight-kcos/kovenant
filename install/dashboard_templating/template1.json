@@ -286,7 +286,7 @@
           "step": 10
         }
       ],
-      "title": "$namespace: Disk Usage",
+      "title": "$namespace: Container FS Usage",
       "type": "stat"
     },
     {

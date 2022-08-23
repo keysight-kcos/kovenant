@@ -1,0 +1,38 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: deep-space
+  labels:
+    name: deep-space
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ripley
+  namespace: deep-space
+spec:
+  containers:
+  - name: ripley
+    image: ripley
+    imagePullPolicy: Never
+    command: 
+      - /bin/sh
+      - "-c"
+      - "sleep 120m"
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nostromo
+  namespace: deep-space
+spec:
+  containers:
+  - name: nostromo
+    image: nostromo
+    imagePullPolicy: Never
+    command: 
+      - /usr/bin/server
