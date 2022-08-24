@@ -29,6 +29,8 @@ kind: Pod
 metadata:
   name: nostromo
   namespace: deep-space
+  labels:
+    app.kubernetes.io/name: nostromo
 spec:
   containers:
   - name: nostromo
@@ -36,3 +38,24 @@ spec:
     imagePullPolicy: Never
     command: 
       - /usr/bin/server
+    ports:
+      - name: nostromo-port
+        containerPort: 80
+        protocol: TCP
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nostromo-service
+  namespace: deep-space
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: nostromo
+  ports:
+  - name: nostromo-port
+    protocol: TCP
+    port: 8080
+    targetPort: nostromo-port
