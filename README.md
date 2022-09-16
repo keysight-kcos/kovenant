@@ -19,6 +19,8 @@ Note about directories in this repo: Everything that isn't in the `install` dire
 
 ## Installing kovenant on your K8s cluster
 
+K8s version should be v1.19 or greater for Ingress objects.
+
 Make sure helm and helmfile are installed.
 
 Install the helm diff plugin with `helm plugin install https://github.com/databus23/helm-diff`.
