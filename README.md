@@ -19,6 +19,10 @@ Note about directories in this repo: Everything that isn't in the `install` dire
 
 ## Installing kovenant on your K8s cluster
 
+Make sure helm and helmfile are installed.
+
+Install the helm diff plugin with `helm plugin install https://github.com/databus23/helm-diff`.
+
 From within the `install` directory:
 - `cp example_dotenv .env` and replace the variables in the new file as desired.
 - `cd ./telegraf_image`
